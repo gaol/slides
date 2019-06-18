@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.jboss.ext.slides;
+package org.ihomeland.slides;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,14 +25,14 @@ import org.slf4j.LoggerFactory;
 import io.vertx.core.Future;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.shareddata.LocalMap;
+
 import io.vertx.reactivex.core.AbstractVerticle;
 import io.vertx.reactivex.core.http.HttpServer;
 import io.vertx.reactivex.ext.web.Router;
-import io.vertx.reactivex.ext.web.handler.StaticHandler;
 import io.vertx.reactivex.ext.web.templ.freemarker.FreeMarkerTemplateEngine;
 
 /**
+ * This is the default Verticle to deploy which starts a HTTP server.
  *
  */
 public class SlidesVerticle extends AbstractVerticle {
@@ -42,42 +42,24 @@ public class SlidesVerticle extends AbstractVerticle {
     @Override
     public void start(Future<Void> startFuture) throws Exception {
         JsonObject config = config();
-
         JsonObject httpConfig = config.getJsonObject("http.server.options", new JsonObject());
-        HttpServerOptions httpOptions = new HttpServerOptions(httpConfig);
+        HttpServerOptions httpOptions = new HttpServerOptions(httpConfig).setPort(8080);
         if (System.getProperty("http.server.host") != null) {
             httpOptions.setHost(System.getProperty("http.server.host"));
         }
         if (System.getProperty("http.server.port") != null) {
             httpOptions.setPort(Integer.getInteger("http.server.port", httpOptions.getPort()));
         }
-        vertx.exceptionHandler(e -> {
-            logger.error("Something error.", e);
-        });
         HttpServer httpServer = vertx.createHttpServer(httpOptions);
-        httpServer.exceptionHandler(e -> {
-            logger.error("Errors found in HttpServer", e);
-        });
         Router slidesRouter = Router.router(vertx);
-
-        slidesRouter.get("/static/*").handler(StaticHandler.create().setDirectoryListing(true));
         SlideShowHandler.install(slidesRouter, FreeMarkerTemplateEngine.create(vertx), config.getJsonObject("slides.config", new JsonObject()));
-
         httpServer.requestHandler(slidesRouter).rxListen(httpOptions.getPort()).subscribe(s -> {
-            logger.info("HTTP server running on port: " + s.actualPort());
+            logger.info("HTTP server is running on port: " + s.actualPort());
             startFuture.complete();
         }, e -> {
             logger.error("Failed to start HTTP server.", e);
             startFuture.fail(e);
         });
-    }
-
-    @Override
-    public void stop(Future<Void> stopFuture) throws Exception {
-        final LocalMap<String, String> unzippedSlides = vertx.getDelegate().sharedData().getLocalMap("unzipped_slides");
-        for (String dir: unzippedSlides.values()) {
-            vertx.fileSystem().deleteRecursiveBlocking(dir, true);
-        }
     }
 
 }
