@@ -8,7 +8,7 @@ This can be used in several ways, most common use case can be running the docker
 
 In case you have `slides` directory in your working directory, run the following command can start a
 ready-to-use slides webapp for you.
-> docker run --rm -p 8080:8080 -v `pwd`:/opt/app aoingl/slides-app
+> docker run --rm -p 8080:8080 -v \`pwd\`:/opt/app aoingl/slides-app
 
 #### Example:
 
