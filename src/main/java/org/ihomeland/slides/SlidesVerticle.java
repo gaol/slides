@@ -52,9 +52,11 @@ public class SlidesVerticle extends AbstractVerticle {
         }
         HttpServer httpServer = vertx.createHttpServer(httpOptions);
         Router slidesRouter = Router.router(vertx);
-        SlideShowHandler.install(slidesRouter, FreeMarkerTemplateEngine.create(vertx), config.getJsonObject("slides.config", new JsonObject()));
+        JsonObject slidesConfig = config.getJsonObject("slides.config", new JsonObject());
+        SlideShowHandler.install(slidesRouter, FreeMarkerTemplateEngine.create(vertx), slidesConfig);
         httpServer.requestHandler(slidesRouter).rxListen(httpOptions.getPort()).subscribe(s -> {
-            logger.info("HTTP server is running on port: " + s.actualPort());
+            String slidePath = SlideShowHandler.slidePath(slidesConfig);
+            logger.info("Now the slides can be accessed under prefix:\n\nhttp://" + httpOptions.getHost() + ":" + s.actualPort() + slidePath + "\n");
             startFuture.complete();
         }, e -> {
             logger.error("Failed to start HTTP server.", e);

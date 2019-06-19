@@ -11,7 +11,7 @@
 
   <groupId>org.jboss.ext.slides</groupId>
   <artifactId>slides</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>1.0.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>The Slides framework using reveal.js as the JS Slides engine</name>
@@ -28,6 +28,12 @@
     <version.reveal.js>3.8.0</version.reveal.js>
     <version.bootstrap>4.3.1</version.bootstrap>
   </properties>
+
+  <scm>
+    <connection>scm:git:git@github.com:gaol/slides.git</connection>
+    <developerConnection>scm:git:git@github.com:gaol/slides.git</developerConnection>
+    <url>https://github.com/gaol/slides</url>
+  </scm>
 
   <dependencyManagement>
     <dependencies>
@@ -94,33 +100,35 @@
     </dependency>
   </dependencies>
 
-  <build>
-
-    <finalName>${project.artifactId}</finalName>
-
-    <plugins>
-      <plugin>
-        <groupId>io.reactiverse</groupId>
-        <artifactId>vertx-maven-plugin</artifactId>
-        <version>${vertx-maven-plugin.version}</version>
-        <executions>
-          <execution>
-            <id>vmp</id>
-            <goals>
-              <goal>initialize</goal>
-              <goal>package</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <redeploy>true</redeploy>
-          <verticle>${vertx.verticle}</verticle>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
-
   <profiles>
+
+    <profile>
+      <id>app</id>
+      <build>
+        <finalName>${project.artifactId}-app</finalName>
+        <plugins>
+          <plugin>
+            <groupId>io.reactiverse</groupId>
+            <artifactId>vertx-maven-plugin</artifactId>
+            <version>${vertx-maven-plugin.version}</version>
+            <executions>
+              <execution>
+                <id>vmp</id>
+                <goals>
+                  <goal>initialize</goal>
+                  <goal>package</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <redeploy>false</redeploy>
+              <verticle>${vertx.verticle}</verticle>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
 	<profile>
 	    <id>jdk11</id>
 	    <activation>
@@ -139,6 +147,7 @@
 		</dependency>
 	    </dependencies>
 	</profile>
+
     <profile>
       <id>openshift</id>
       <build>

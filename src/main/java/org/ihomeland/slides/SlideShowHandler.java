@@ -54,11 +54,11 @@ public class SlideShowHandler implements Handler<RoutingContext> {
         router.get(handler.slideUrlPath + ":slide/").handler(handler);
         router.get(handler.slideUrlPath + ":slide").handler(handler);
         router.get(handler.slideUrlPath + ":slide/*").handler(handler);
-        router.get(getWebJarsRootPath(config) + "*").handler(StaticHandler.create().setWebRoot(config.getString("webroot", StaticHandler.DEFAULT_WEB_ROOT)));
+        router.get(getWebJarsRootPath(config) + "*").handler(StaticHandler.create().setWebRoot(configString(config, "webroot", StaticHandler.DEFAULT_WEB_ROOT)));
     }
 
     private static String getWebJarsRootPath(JsonObject config) {
-        return config.getString("webroot.path", "/");
+        return configString(config, "webroot.path", "/");
     }
 
     private final JsonObject config;
@@ -69,12 +69,24 @@ public class SlideShowHandler implements Handler<RoutingContext> {
     private SlideShowHandler(TemplateEngine templateEngine, JsonObject config) {
         this.templateEngine = templateEngine;
         this.config = config;
-        String slidePath = config.getString("slides.path", "/slides");
+        this.slideUrlPath = slidePath(config);
+        this.explodedDir = configString(config, "exploded.dir", Paths.get(System.getProperty("java.io.tmpdir"), "vertx-slides-exploded", UUID.randomUUID().toString()).toString());
+    }
+
+    static String slidePath(JsonObject config) {
+        String slidePath = configString(config, "slides.path", "/slides");
         if (!slidePath.endsWith("/")) {
             slidePath = slidePath + "/";
         }
-        this.slideUrlPath = slidePath;
-        this.explodedDir = config.getString("exploded.dir", Paths.get(System.getProperty("java.io.tmpdir"), "vertx-slides-exploded", UUID.randomUUID().toString()).toString());
+        return slidePath;
+    }
+
+    static String slideRootDir(JsonObject config) {
+        return configString(config, "slides.root.dir", "slides");
+    }
+
+    private static String configString(JsonObject config, String key, String dft) {
+        return config.getString(key, System.getProperty(key, dft));
     }
 
     @Override
@@ -93,8 +105,9 @@ public class SlideShowHandler implements Handler<RoutingContext> {
         }
 
         Vertx vertx = ctx.vertx();
-        final String slidesRootDir = config.getString("slides.root.dir", "slides");
-        final String slideZipRoot = config.getString("slides.zip.root.dir", "slides_zip");
+        final String slidesRootDir = slideRootDir(config);
+        final String slideZipRoot = configString(config, "slides.zip.root.dir", "slides_zip");
+
         final LocalMap<String, String> slideDirMap = vertx.sharedData().getLocalMap("slides_Dir");
         final LocalMap<String, String> unzippedSlides = vertx.sharedData().getLocalMap("unzipped_slides");
         final LocalMap<String, String> explodedDirMap = vertx.sharedData().getLocalMap("exploded_dir_map");
@@ -166,7 +179,7 @@ public class SlideShowHandler implements Handler<RoutingContext> {
                      });
                  });
             } else {
-                final String filePath = dir.toString() + File.separator + requestedFile;
+                final String filePath = dir + File.separator + requestedFile;
                 responseSingle = vertx.fileSystem().rxExists(filePath).flatMap(e -> {
                     found.set(e);
                     if (e) {
@@ -199,8 +212,10 @@ public class SlideShowHandler implements Handler<RoutingContext> {
     }
 
     private void deleteExploded(Vertx vertx) {
-        logger.info("Trying to delete the tempoary exploded zip directory: " + this.explodedDir);
-        vertx.fileSystem().deleteRecursiveBlocking(this.explodedDir, true);
+        if (vertx.fileSystem().existsBlocking(this.explodedDir)) {
+            logger.info("Delete the tempoary exploded zip directory: " + this.explodedDir);
+            vertx.fileSystem().deleteRecursiveBlocking(this.explodedDir, true);
+        }
     }
 
     private JsonObject defaultMeta() {
