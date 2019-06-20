@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.ihomeland.slides;
+package cn.ihomeland.slides;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

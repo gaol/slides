@@ -1,4 +1,4 @@
-package org.ihomeland.slides;
+package cn.ihomeland.slides;
 
 import java.io.File;
 import java.io.FileInputStream;

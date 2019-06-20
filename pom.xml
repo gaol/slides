@@ -8,7 +8,7 @@
     <version>14</version>
   </parent>
 
-  <groupId>org.ihomeland.slides</groupId>
+  <groupId>cn.ihomeland.slides</groupId>
   <artifactId>slides</artifactId>
   <version>1.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
@@ -21,7 +21,7 @@
     <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
 
     <vertx-maven-plugin.version>1.0.18</vertx-maven-plugin.version>
-    <vertx.verticle>org.ihomeland.slides.SlidesVerticle</vertx.verticle>
+    <vertx.verticle>cn.ihomeland.slides.SlidesVerticle</vertx.verticle>
     <vertx.version>3.7.1</vertx.version>
     <version.slf4j>1.7.25</version.slf4j>
     <version.reveal.js>3.8.0</version.reveal.js>
