@@ -54,3 +54,9 @@ The `my_talk.zip` file structure is just like the `free_talk` directory:
 > mvn clean install -Papp
 
 Use the profile `app` to build the `slides-app.jar`
+
+## How to release
+
+> mvn clean install -Psonatype-oss-release
+
+This will build the all ready to deploy artifiacts

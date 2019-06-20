@@ -35,6 +35,24 @@
     <tag>slides-1.0.0</tag>
   </scm>
 
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <sourceFileExcludes>
+            <sourceFileExclude>**/package-info.java</sourceFileExclude>
+          </sourceFileExcludes>
+          <sourceFileIncludes>
+            <sourceFileInclude>cn/ihomeland/**/*.java</sourceFileInclude>
+          </sourceFileIncludes>
+          <additionalparam>-Xdoclint:none &#45;&#45;allow-script-in-comments</additionalparam>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
   <dependencyManagement>
     <dependencies>
       <dependency>
