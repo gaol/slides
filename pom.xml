@@ -10,7 +10,7 @@
 
   <groupId>cn.ihomeland.slides</groupId>
   <artifactId>slides</artifactId>
-  <version>1.0.2-SNAPSHOT</version>
+  <version>1.0.2</version>
   <packaging>jar</packaging>
 
   <name>The slides application that uses reveal.js as the JS Slides engine</name>
@@ -47,7 +47,7 @@
           <sourceFileIncludes>
             <sourceFileInclude>cn/ihomeland/**/*.java</sourceFileInclude>
           </sourceFileIncludes>
-          <additionalparam>-Xdoclint:none &#45;&#45;allow-script-in-comments</additionalparam>
+          <additionalparam>-Xdoclint:none --allow-script-in-comments</additionalparam>
         </configuration>
       </plugin>
     </plugins>
