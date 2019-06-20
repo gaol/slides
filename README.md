@@ -12,24 +12,25 @@ ready-to-use slides webapp for you.
 
 #### Example:
 
-Current working directory structure:
+Structure in `samples` directory:
 
-    .
-    ├── slides                      # this can be overriden
-    │   └── free_talk               # This is the slide name
-    │       ├── slide.html          # this is the main slide content. (reveal.js style)
-    │       ├── slide.json          # this is the customized freemarker context used in the default slide template
-    │       └── use_mouse.jpg       # any image can be refered as relative link
-    └── slides_zip                  # any slides zip file can be stored here.
-        └── my_talk.zip             # slide name in this case is: 'my_talk'
-
+    samples/
+    └── slides
+        └── free_talk                  # the slide name can be overriden 
+            ├── reactive-traits.svg    # the image can be refered as relative link in the slide.html
+            ├── Server.java            # sample file that can be refered to in the side.html as well
+            ├── server.js              # sample file that can be refered to in the side.html as well
+            ├── slide.html             # the main slide content (reveal.js defined content)
+            └── slide.json             # customized freemarker context used in default slide template
 
 After running above command, the slide in `slides/free_talk` can be accessed using link:
 > http://localhost:8080/slides/free_talk/
 
 Any changes in the slides will take effect immediately.
 
-Also, if the slides are packaged into a zip file, just like the `my_talk.zip` in this example,
+![Sample Talk](samples/free_talk.gif)
+
+Also, if the slides are packaged into a zip file, like the `my_talk.zip` in the `slides_zip` directory in the working directory.
 it can be accessed using link:
 
 > http://localhost:8080/slides/my_talk/

@@ -1,0 +1,150 @@
+<section>
+
+  <h4 style="text-align: justify;">Introduction to Eclipse Vert.x</h4>
+  <div style="text-align: justify;">
+    <span>Leo Gao</span><br>
+  </div>
+  <div style="text-align: justify;">
+    <br>
+  </div>
+  <div style="text-align: justify;">
+    <br />
+  </div>
+</section>
+
+<section>
+  <h4>Agenda</h4>
+  <p></p>
+  <ul>
+    <li>
+      <span>What is Eclipse Vert.x</span><br>
+    </li>
+    <li>
+      <span>Starts Coding</span><br>
+    </li>
+    <li>
+      <span>Vert.x Ecosystem</span><br>
+    </li>
+    <li>
+      <span>Q/A</span><br>
+    </li>
+  </ul>
+  <p></p>
+  <div>
+    <ul></ul><br/>
+    <ul></ul>
+  </div>
+</section>
+
+<section>
+  <h4 class="absolute-element">What is Eclipse Vert.X?</h4>
+  <blockquote class="absolute-element fragment">"
+    Eclipse Vert.x is a
+    tool-kit for building reactive applications on the JVM."
+    <br><br>
+  </blockquote>
+  <br>
+</section>
+
+<section>
+  <h4>Toolkit</h4>
+  <p></p>
+  <ul>
+    <li class="fragment" data-fragment-index="0">
+      <span>Not a container, Not a framework</span><br>
+    </li>
+    <li class="fragment" data-fragment-index="1">
+      <span>Lightweight regular Java library</span><br>
+    </li>
+    <li class="fragment" data-fragment-index="2">
+      <span>Event driven APIs</span><br>
+    </li>
+    <li class="fragment" data-fragment-index="3">
+      <span>Based on Netty Project</span><br>
+    </li>
+  </ul>
+  <br>
+</section>
+
+<section>
+  <h4>Reactive Applications</h4>
+  <div>
+    <img src="reactive-traits.svg" style="width: 800px; height: 400px;"/>
+  </div>
+  <div style="text-align: justify; text-align: center;">
+    <a href="https://www.reactivemanifesto.org/" target="_blank">The Reactive Manifesto</a>
+  </div>
+</section>
+
+<section>
+  <h4>Polyglot</h4>
+  <div>
+    <blockquote>"You can use Vert.x with multiple languages including Java, JavaScript, Groovy, Ruby, Ceylon, Scala and Kotlin."
+      <br /><br />
+    </blockquote>
+  </div>
+  <div class="fragment fade-down">
+    On JVM
+  </div>
+</section>
+
+<section>
+  <h4>Run Blocking Codes</h4>
+  <div>
+    <pre><code  data-line-numbers="1">vertx.executeBlocking(future -> {
+      String result = someAPI.blockingMethod("hello");
+      future.complete(result);
+    }, res -> {
+      System.out.println("The result is: " + res.result());
+    });</code></pre>
+  </div>
+  <div class="fragment fade-down">
+    executed on the Vert.x worker pool
+  </div>
+  <div class="fragment fade-down">
+    How about very long running codes?
+  </div>
+</section>
+
+<section>
+  <h4>What does Vert.x Application look like?</h4>
+</section>
+
+<section>
+  <section>
+    <h4>JAVA</h4>
+    <div>
+      <a href="Server.java" target="_blank">Server.java:</a>
+      <pre><code data-line-numbers="2,4">import io.vertx.core.AbstractVerticle;
+public class Server extends AbstractVerticle {
+  public void start() {
+    vertx.createHttpServer().requestHandler(req -> {
+      req.response()
+        .putHeader("content-type", "text/plain")
+        .end("Hello from Vert.x! " + Thread.currentThread());
+    }).listen(8080);
+  }
+}</code></pre>
+    </div>
+    <div><pre><code>docker run -i -t --rm -p 8080:8080 -v $PWD:/verticles docker.io/aoingl/vert3-exec-jdk run /verticles/Server.java</code></pre></div>
+  </section>
+  <section>
+    <h4>JAVASCRIPT</h4>
+    <div>
+      <a href="server.js" target="_blank">server.js:</a>
+      <pre><code data-line-numbers="2">vertx.createHttpServer()
+  .requestHandler(function (req) {
+    req.response()
+      .putHeader("content-type", "text/plain")
+      .end("Hello from Vert.x!");
+}).listen(8080);</code></pre>
+    </div>
+    <div><pre><code>docker run -i -t --rm -p 8080:8080 -v $PWD:/verticles docker.io/vertx/vertx3-exec run /verticles/server.js</code></pre></div>
+  </section>
+
+</section>
+
+<section>
+  <h4>Thanks</h4>
+  <div>Q / A</div>
+</section>

@@ -54,11 +54,11 @@ public class SlideShowHandler implements Handler<RoutingContext> {
         router.get(handler.slideUrlPath + ":slide/").handler(handler);
         router.get(handler.slideUrlPath + ":slide").handler(handler);
         router.get(handler.slideUrlPath + ":slide/*").handler(handler);
-        router.get(getWebJarsRootPath(config) + "*").handler(StaticHandler.create().setWebRoot(configString(config, "webroot", StaticHandler.DEFAULT_WEB_ROOT)));
+        router.get(getWebJarsRootPath(config) + "*").handler(StaticHandler.create().setWebRoot(Utils.configString(config, "webroot", StaticHandler.DEFAULT_WEB_ROOT)));
     }
 
     private static String getWebJarsRootPath(JsonObject config) {
-        return configString(config, "webroot.path", "/");
+        return Utils.configString(config, "webroot.path", "/");
     }
 
     private final JsonObject config;
@@ -70,11 +70,11 @@ public class SlideShowHandler implements Handler<RoutingContext> {
         this.templateEngine = templateEngine;
         this.config = config;
         this.slideUrlPath = slidePath(config);
-        this.explodedDir = configString(config, "exploded.dir", Paths.get(System.getProperty("java.io.tmpdir"), "vertx-slides-exploded", UUID.randomUUID().toString()).toString());
+        this.explodedDir = Utils.configString(config, "exploded.dir", Paths.get(System.getProperty("java.io.tmpdir"), "vertx-slides-exploded", UUID.randomUUID().toString()).toString());
     }
 
     static String slidePath(JsonObject config) {
-        String slidePath = configString(config, "slides.path", "/slides");
+        String slidePath = Utils.configString(config, "slides.path", "/slides");
         if (!slidePath.endsWith("/")) {
             slidePath = slidePath + "/";
         }
@@ -82,11 +82,7 @@ public class SlideShowHandler implements Handler<RoutingContext> {
     }
 
     static String slideRootDir(JsonObject config) {
-        return configString(config, "slides.root.dir", "slides");
-    }
-
-    private static String configString(JsonObject config, String key, String dft) {
-        return config.getString(key, System.getProperty(key, dft));
+        return Utils.configString(config, "slides.root.dir", "slides");
     }
 
     @Override
@@ -106,7 +102,7 @@ public class SlideShowHandler implements Handler<RoutingContext> {
 
         Vertx vertx = ctx.vertx();
         final String slidesRootDir = slideRootDir(config);
-        final String slideZipRoot = configString(config, "slides.zip.root.dir", "slides_zip");
+        final String slideZipRoot = Utils.configString(config, "slides.zip.root.dir", "slides_zip");
 
         final LocalMap<String, String> slideDirMap = vertx.sharedData().getLocalMap("slides_Dir");
         final LocalMap<String, String> unzippedSlides = vertx.sharedData().getLocalMap("unzipped_slides");

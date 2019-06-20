@@ -15,6 +15,8 @@ ENV SLIDES_ROOT_DIR slides
 ENV SLIDES_ZIP_DIR  slides_zip
 ENV SLIDES_PATH /slides
 
+ENV HTTP_SERVER_HOST 0.0.0.0
+ENV HTTP_SERVER_PORT 8080
 
 EXPOSE 8080
 
@@ -25,4 +27,4 @@ COPY target/$VERTICLE_FILE $VERTICLE_HOME/
 WORKDIR /opt/app/
 
 ENTRYPOINT ["sh", "-c"]
-CMD ["exec java -cp . -Dslides.path=$SLIDES_PATH -Dslides.root.dir=$SLIDES_ROOT_DIR -Dslides.zip.root.dir=$SLIDES_ZIP_DIR -jar $VERTICLE_HOME/$VERTICLE_FILE"]
+CMD ["exec java -cp . -Dhttp.server.host=$HTTP_SERVER_HOST -Dhttp.server.port=$HTTP_SERVER_PORT -Dslides.path=$SLIDES_PATH -Dslides.root.dir=$SLIDES_ROOT_DIR -Dslides.zip.root.dir=$SLIDES_ZIP_DIR -jar $VERTICLE_HOME/$VERTICLE_FILE"]
