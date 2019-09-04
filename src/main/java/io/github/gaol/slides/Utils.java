@@ -49,10 +49,12 @@ class Utils {
                         String fn = ze.getName();
                         File newFile = new File(dir + File.separator + fn);
                         if (override || !newFile.exists()) {
-                            newFile.createNewFile();
+                            if (!newFile.exists()) {
+                                newFile.createNewFile();
+                            }
                             if (!newFile.getCanonicalPath().startsWith(dir)) {
                                 newFile.delete();
-                                throw new IOException("");
+                                throw new IOException("Cannot unzip file to outside of target directory: " + dir);
                             }
                             try (FileOutputStream fos = new FileOutputStream(newFile)) {
                                 int len;
