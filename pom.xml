@@ -8,7 +8,7 @@
     <version>14</version>
   </parent>
 
-  <groupId>cn.ihomeland.slides</groupId>
+  <groupId>io.github.gaol.slides</groupId>
   <artifactId>slides</artifactId>
   <version>1.0.3-SNAPSHOT</version>
   <packaging>jar</packaging>
@@ -21,8 +21,8 @@
     <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
 
     <vertx-maven-plugin.version>1.0.18</vertx-maven-plugin.version>
-    <vertx.verticle>cn.ihomeland.slides.SlidesVerticle</vertx.verticle>
-    <vertx.version>3.7.1</vertx.version>
+    <vertx.verticle>io.github.gaol.slides.SlidesVerticle</vertx.verticle>
+    <vertx.version>3.8.1</vertx.version>
     <version.slf4j>1.7.25</version.slf4j>
     <version.reveal.js>3.8.0</version.reveal.js>
     <version.bootstrap>4.3.1</version.bootstrap>
@@ -32,7 +32,6 @@
     <connection>scm:git:git@github.com:gaol/slides.git</connection>
     <developerConnection>scm:git:git@github.com:gaol/slides.git</developerConnection>
     <url>https://github.com/gaol/slides</url>
-    <tag>slides-1.0.0</tag>
   </scm>
 
   <build>
@@ -45,7 +44,7 @@
             <sourceFileExclude>**/package-info.java</sourceFileExclude>
           </sourceFileExcludes>
           <sourceFileIncludes>
-            <sourceFileInclude>cn/ihomeland/**/*.java</sourceFileInclude>
+            <sourceFileInclude>io/github/gaol/slides/**/*.java</sourceFileInclude>
           </sourceFileIncludes>
           <additionalparam>-Xdoclint:none --allow-script-in-comments</additionalparam>
         </configuration>

@@ -1,14 +1,9 @@
-package cn.ihomeland.slides;
+package io.github.gaol.slides;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 import io.vertx.core.http.impl.MimeMapping;
 import io.vertx.reactivex.ext.web.common.template.TemplateEngine;
@@ -27,7 +22,7 @@ import io.vertx.reactivex.ext.web.Router;
 import io.vertx.reactivex.ext.web.RoutingContext;
 
 /**
- * This Handler
+ * This Handler takes care of how to access the Slides application.
  */
 public class SlideShowHandler implements Handler<RoutingContext> {
 
@@ -49,12 +44,12 @@ public class SlideShowHandler implements Handler<RoutingContext> {
      * @param templateEngine The TemplateEngine used to render the slide page, default to FreeMarkerTemplateEngine.
      * @param config The JsonObject configuration used to configure where to find/serve the slide page.
      */
-    public static final void install(Router router, TemplateEngine templateEngine, JsonObject config) {
+    static void install(Router router, TemplateEngine templateEngine, JsonObject config) {
         SlideShowHandler handler = new SlideShowHandler(templateEngine, config == null ? new JsonObject() : config);
         router.get(handler.slideUrlPath + ":slide/").handler(handler);
         router.get(handler.slideUrlPath + ":slide").handler(handler);
         router.get(handler.slideUrlPath + ":slide/*").handler(handler);
-        router.get(getWebJarsRootPath(config) + "*").handler(StaticHandler.create().setWebRoot(Utils.configString(config, "webroot", StaticHandler.DEFAULT_WEB_ROOT)));
+        router.get(getWebJarsRootPath(config) + "*").handler(StaticHandler.create().setDirectoryListing(true).setWebRoot(Utils.configString(config, "webroot", StaticHandler.DEFAULT_WEB_ROOT)));
     }
 
     private static String getWebJarsRootPath(JsonObject config) {
@@ -81,7 +76,7 @@ public class SlideShowHandler implements Handler<RoutingContext> {
         return slidePath;
     }
 
-    static String slideRootDir(JsonObject config) {
+    private static String slideRootDir(JsonObject config) {
         return Utils.configString(config, "slides.root.dir", "slides");
     }
 
@@ -112,9 +107,7 @@ public class SlideShowHandler implements Handler<RoutingContext> {
             Runtime.getRuntime().addShutdownHook(new Thread(() -> this.deleteExploded(vertx)));
         }
 
-        final Single<String> dirInCache = Single.fromCallable(() -> {
-            return slideDirMap.getOrDefault(slide, "");
-        });
+        final Single<String> dirInCache = Single.fromCallable(() -> slideDirMap.getOrDefault(slide, ""));
 
         // slide.root.dir/slide directory, vertx file resolver takes care about the classpath by default
         final String slidePath = slidesRootDir + "/" + slide;
@@ -137,7 +130,7 @@ public class SlideShowHandler implements Handler<RoutingContext> {
                         return Single.just(unzippedSlides.get(s));
                     }
                     String targetDir = Paths.get(this.explodedDir, slide).toString();
-                    return unzipFile(vertx, s, targetDir, true)
+                    return Utils.unzipFile(vertx, s, targetDir, true)
                         .flatMap(dir -> {
                             unzippedSlides.put(s, dir);
                             return Single.just(dir);
@@ -152,10 +145,10 @@ public class SlideShowHandler implements Handler<RoutingContext> {
                 return;
             }
             slideDirMap.putIfAbsent(slide, dir);
-            Single<Buffer> responseSingle = null;
+            Single<Buffer> responseSingle;
             final AtomicBoolean found = new AtomicBoolean(false);
             final String requestedFile = path.substring(path.indexOf(redirect) + redirect.length());
-            if (requestedFile == null || requestedFile.equals("") || requestedFile.equals(SLIDE_TEMPLATE)) {
+            if (requestedFile.equals("") || requestedFile.equals(SLIDE_TEMPLATE)) {
                 final String metaFile = dir + File.separator + SLIDE_META;
                 responseSingle = vertx.fileSystem().rxExists(metaFile).flatMap(e -> {
                     if (e) {
@@ -199,12 +192,8 @@ public class SlideShowHandler implements Handler<RoutingContext> {
                     return;
                 }
                 ctx.response().end(sb);
-            }), e -> {
-                ctx.fail(e);
-            });
-        }, e -> {
-            ctx.fail(e);
-        });
+            }), ctx::fail);
+        }, ctx::fail);
     }
 
     private void deleteExploded(Vertx vertx) {
@@ -236,59 +225,23 @@ public class SlideShowHandler implements Handler<RoutingContext> {
                 );
     }
 
-    public static Single<String> unzipFile(Vertx vertx, final String zipFile, final String targetDir, boolean override) {
-        return vertx.fileSystem().rxExists(targetDir).flatMap(e -> {
-            if (!e) {
-                return vertx.fileSystem().rxMkdirs(targetDir).toSingleDefault(targetDir);
-            }
-            return Single.just(targetDir);
-        }).flatMapMaybe(dir -> {
-            return vertx.<String>rxExecuteBlocking(h -> {
-                try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile));) {
-                    ZipEntry ze = zis.getNextEntry();
-                    byte[] buffer = new byte[4029];
-                    while (ze != null) {
-                        String fn = ze.getName();
-                        File newFile = new File(dir + File.separator + fn);
-                        if (override || !newFile.exists()) {
-                            try (FileOutputStream fos = new FileOutputStream(newFile);) {
-                                int len;
-                                while ((len = zis.read(buffer)) > 0) {
-                                    fos.write(buffer, 0, len);
-                                }
-                            }
-                        }
-                        ze = zis.getNextEntry();
-                    }
-                    zis.closeEntry();
-                    h.complete(targetDir);
-                } catch (IOException ioe) {
-                    h.fail(ioe);
-                }
-            });
-        }).toSingle(targetDir);
-    }
-
-    protected <T> Consumer<T> responseNotClosed(final RoutingContext ctx, Consumer<T> con) {
-        return new Consumer<T>() {
-            @Override
-            public void accept(T t) throws Exception {
-                if (ctx.response().closed() || ctx.response().ended()) {
-                    logger.warn("Response has been closed.");
-                } else {
-                    Exception theE = null;
-                    try {
-                        con.accept(t);
-                    } catch (Exception e) {
-                        theE = e;
-                        throw e;
-                    } finally {
-                        if (!ctx.response().ended()) {
-                            if (theE != null) {
-                                ctx.fail(theE);
-                            } else {
-                                ctx.response().end();
-                            }
+    private <T> Consumer<T> responseNotClosed(final RoutingContext ctx, Consumer<T> con) {
+        return t -> {
+            if (ctx.response().closed() || ctx.response().ended()) {
+                logger.warn("Response has been closed.");
+            } else {
+                Exception theE = null;
+                try {
+                    con.accept(t);
+                } catch (Exception e) {
+                    theE = e;
+                    throw e;
+                } finally {
+                    if (!ctx.response().ended()) {
+                        if (theE != null) {
+                            ctx.fail(theE);
+                        } else {
+                            ctx.response().end();
                         }
                     }
                 }

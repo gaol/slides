@@ -17,12 +17,12 @@
  * under the License.
  */
 
-package cn.ihomeland.slides;
+package io.github.gaol.slides;
 
+import io.vertx.core.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.vertx.core.Future;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonObject;
 
@@ -32,7 +32,7 @@ import io.vertx.reactivex.ext.web.Router;
 import io.vertx.reactivex.ext.web.templ.freemarker.FreeMarkerTemplateEngine;
 
 /**
- * This is the default Verticle to deploy which starts a HTTP server.
+ * This is the Verticle to deploy a HTTP server to serve the slides application.
  *
  */
 public class SlidesVerticle extends AbstractVerticle {
@@ -40,7 +40,7 @@ public class SlidesVerticle extends AbstractVerticle {
     private static final Logger logger = LoggerFactory.getLogger(SlidesVerticle.class);
 
     @Override
-    public void start(Future<Void> startFuture) throws Exception {
+    public void start(Promise<Void> promise) throws Exception {
         JsonObject config = config();
         JsonObject httpConfig = config.getJsonObject("http.server.options", new JsonObject());
         HttpServerOptions httpOptions = new HttpServerOptions(httpConfig).setPort(8080);
@@ -57,10 +57,10 @@ public class SlidesVerticle extends AbstractVerticle {
         httpServer.requestHandler(slidesRouter).rxListen(httpOptions.getPort()).subscribe(s -> {
             String slidePath = SlideShowHandler.slidePath(slidesConfig);
             logger.info("Now the slides can be accessed under prefix:\n\nhttp://" + httpOptions.getHost() + ":" + s.actualPort() + slidePath + "\n");
-            startFuture.complete();
+            promise.complete();
         }, e -> {
             logger.error("Failed to start HTTP server.", e);
-            startFuture.fail(e);
+            promise.fail(e);
         });
     }
 
