@@ -18,7 +18,7 @@ Now you can visit the slides:
 The most common way to design your reveal.js based slides using this project is to
 have a `slides` directory in the current working directory. 
 
-Suppose you are in working directory `samples`:
+Suppose you are in working directory [samples](samples/):
 
 > cd samples
 
